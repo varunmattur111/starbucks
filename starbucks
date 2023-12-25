@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract StarbucksReward {
+    address public owner;
+    uint public contractBalance; 
+
+    mapping(address => uint) public rewardPoints; 
+    event PointsEarned(address indexed user, uint points);
+    event PointsRedeemed(address indexed user, uint points);
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only contract owner can perform this action");
+        _;
+    }
+
+  function earnPoints(uint points) external {
+    // Use assert to ensure points are positive
+    assert(points > 0);
+
+    rewardPoints[msg.sender] += points;
+
+    emit PointsEarned(msg.sender, points);
+}
+
+    function withdrawPoints(uint pointsToWithdraw) external onlyOwner{
+        // Use revert to revert if there's an insufficient balance
+        if (rewardPoints[msg.sender] < pointsToWithdraw) {
+            revert("Insufficient points balance");
+        }
+
+        rewardPoints[msg.sender] -= pointsToWithdraw;
+
+        emit PointsRedeemed(msg.sender, pointsToWithdraw);
+    }
+}
